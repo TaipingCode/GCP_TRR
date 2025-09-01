@@ -2,25 +2,25 @@ name: Deploy Nginx
 
 on:
   push:
-    branch:
-    - 'main'
-  
+    branches:
+      - 'main'
+
 jobs:
   deploy:
-  runs-on: ubuntu-latest
-  steps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  - name: code checkout
-    uses: actions/checkout@v2
-    with:
-      project_id: ${{ secrets.GOOGLE_PROJECT }}
-      service_account_key: ${{ secrets.GOOGEL_APPLICATION_CREDENTIALS }}
-      export_default_credentials: true
-  
-  - name: build and push the docker image
-    env:
-      GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
-    run:
-      gcloud auth configure-docker us-east4-docker.pkg.dev
-      docker build -t us-east4-docker.pkg.dev/organic-zephyr-470807-h1/testtrr/nginx:latest .
-      docker push us-east4-docker.pkg.dev/organic-zephyr-470807-h1/testtrr/nginx:latest
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+      - name: Configure Docker for GCP
+        run: gcloud auth configure-docker us-east4-docker.pkg.dev
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t us-east4-docker.pkg.dev/organic-zephyr-470807-h1/testtrr/nginx:latest .
+          docker push us-east4-docker.pkg.dev/organic-zephyr-470807-h1/testtrr/nginx:latest
